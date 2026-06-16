@@ -5,22 +5,8 @@
     </head>
     <body>
         <div id=app>
-        <h1>WebSocket Test</h1>
-        <form v-on:submit.prevent>
-            <div>
-                username
-                <input class="username" type="text" id="username" autocomplete="off" v-model="username"/>
-            </div>
-            <div>
-                password
-                <input class="password" type="text" id="password" autocomplete="off" v-model="password"/>
-            </div>
-            <div>
-                <button v-on:click="login">login</button>
-            </div>
-
-            
-        </form>
+        <h1>VeighNa WebTrader</h1>
+        <p>{{ status }}</p>
         <ul id='messages'>
         </ul>
         </div>
@@ -32,12 +18,11 @@
                 data: function() {
                     return {
                         TOKEN:"",
-                        username:"",
-                        password:""
+                        status:"正在通过 Google 登录授权连接 WebTrader..."
                     }
                 },
                 mounted(){
-                    this.init()
+                    this.login()
                 },
                 methods: {
                     init:function(){
@@ -58,9 +43,11 @@
                     },
                     open: function () {
                         console.log("socket connected")
+                        this.status = "WebTrader 已连接。"
                     },
                     error: function () {
                         console.log("connect error")
+                        this.status = "WebTrader 连接失败。"
                     },
                     getMessage: function (event) {
                         console.log(event)
@@ -77,11 +64,8 @@
                         console.log("socket已经关闭")
                     },
                     login: function (evevt) {
-                        that = this
-                        pa = new FormData()
-                        pa.append("username", that.username)
-                        pa.append("password", that.password)
-                        this.$http.post("/token",pa).then(function(res){
+                        var that = this
+                        this.$http.post("/token").then(function(res){
                             console.log("login success") 
                             console.log(res.data) 
                             that.TOKEN = res.data
@@ -96,6 +80,8 @@
                             } 
                         },function(){
                             console.log('login error');
+                            that.status = "Google 登录已失效，请重新登录。";
+                            window.location.href = "/login?next=/webtrader/";
                         });
                     }
                 }
